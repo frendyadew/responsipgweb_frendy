@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta Lokasi Wisata Kabupaten Bantul</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        #list-container {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        #list-container ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #list-container ul li {
+            cursor: pointer;
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 3px;
+            transition: background-color 0.3s ease;
+        }
+
+        #list-container ul li:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigasi -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="index.html">🌍 Wisata Bantul</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="peta.html">Peta</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="https://geoportal.bantulkab.go.id" target="_blank">Sumber</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Peta -->
+    <div id="map" style="height: 100vh;"></div>
+    <div id="list-container">
+        <ul id="location-list"></ul>
+    </div>
+
+    <!-- Script -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="data/wisata_bantul.js"></script>
+    <script src="data/batas_bantul.geojson"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Inisialisasi Peta
+        var map = L.map('map').setView([-7.917866633781956, 110.31468202091143], 12);
+
+        // Tambahkan Basemap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Ikon Marker Kustom
+        var customIcon = L.icon({
+            iconUrl: 'img/marker-icon.png',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -32]
+        });
+
+        // Tambahkan Batas Administrasi Bantul tanpa Interaksi
+        fetch('data/batas_bantul.geojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: {
+                        color: 'blue',
+                        weight: 2,
+                        fillOpacity: 0.1
+                    },
+                    interactive: false
+                }).addTo(map);
+            });
+
+        // Tambahkan Marker Wisata dan daftar lokasi
+        var locationList = document.getElementById('location-list');
+
+        L.geoJSON(wisataData, {
+            pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, { icon: customIcon });
+            },
+            onEachFeature: function (feature, layer) {
+                // Tambahkan Popup untuk informasi wisata
+                layer.bindPopup(`
+                    <b>${feature.properties.nama}</b><br>
+                    ${feature.properties.deskripsi}<br>
+                    <img src="${feature.properties.gambar}" style="width:100%; border-radius:10px;">
+                `);
+
+                // Tambahkan Tooltip untuk judul saat hover
+                layer.bindTooltip(feature.properties.nama, {
+                    permanent: false,
+                    direction: 'top',
+                });
+
+                // Tambahkan ke daftar lokasi
+                var listItem = document.createElement('li');
+                listItem.textContent = feature.properties.nama;
+                listItem.addEventListener('click', function () {
+                    map.setView(layer.getLatLng(), 15); // Zoom ke lokasi
+                    layer.openPopup(); // Buka popup
+                });
+                locationList.appendChild(listItem);
+            }
+        }).addTo(map);
+    </script>
+</body>
+</html>
