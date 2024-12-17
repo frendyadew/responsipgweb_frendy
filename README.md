@@ -2,7 +2,7 @@
 
 ## Nama dan NIM
 - **Nama**: Frendy Ade Wicaksono  
-- **NIM**: [Masukkan NIM Anda]  
+- **NIM**: 23/523180/SV/23868
 
 ---
 
