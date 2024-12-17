@@ -25,6 +25,7 @@ Proyek ini memiliki struktur file sebagai berikut:
 │   └── batas_bantul.geojson # Data GeoJSON batas administrasi Bantul
 ├── img/
 │   └── marker-icon.png    # Ikon kustom untuk marker pada peta
+|   └── gambar lokasi wisata (jpg)
 ├── index.html             # Halaman utama (Homepage)
 ├── peta.html              # Halaman peta interaktif
 ├── about.html             # Halaman informasi situs
